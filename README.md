@@ -12,7 +12,17 @@ The Gamified Finance Tracker is a web application built with Django that allows 
 - **Expense Prediction**: Forecast future expenses using the Prophet model.
 - **CSV Export**: Download financial items as a CSV file for offline analysis.
 
+## Screenshots
+![WhatsApp Image 2024-09-24 at 13 57 14_773f1884](https://github.com/user-attachments/assets/aca04e9c-5fe6-4eb7-8fa0-97068780ee48)
+![WhatsApp Image 2024-09-24 at 19 10 56_3d9a86dd](https://github.com/user-attachments/assets/59b93d01-5a40-43fe-b537-c15b19740eae)
+![WhatsApp Image 2024-09-24 at 19 11 15_abb1841a](https://github.com/user-attachments/assets/4cc2c3ff-28cb-4beb-a4f4-a19c2e36745a)
+![WhatsApp Image 2024-09-24 at 19 12 00_d672e2a6](https://github.com/user-attachments/assets/0f925ddd-b51d-4564-a76e-9e5675366942)
+
+
+![WhatsApp Image 2024-09-24 at 19 10 35_1a1e9909](https://github.com/user-attachments/assets/c6735bfe-53a9-42cf-8c11-764217a1ecea)
+
 ## Requirements
+
 - Python 3.x
 - Django
 - Pandas
