@@ -116,11 +116,10 @@ def download_items_csv(request):
     # CSV download logic here
 
 ```
-Models
+
 The application uses the following models:
 
-python
-Copy code
+```python
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -140,3 +139,4 @@ class UserProfile(models.Model):
 
     def update_progress_and_level(self, latest_item):
         # Update progress logic here
+```
