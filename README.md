@@ -140,3 +140,20 @@ class UserProfile(models.Model):
     def update_progress_and_level(self, latest_item):
         # Update progress logic here
 ```
+## Requirements
+
+- Python 3.x
+- Django
+- Prophet
+- Matplotlib
+- Other dependencies as listed in `requirements.txt`
+
+## Future Improvements
+
+- Add user roles (e.g., admin)
+- Implement notifications for budget exceedance
+- Improve UI/UX with frontend frameworks (e.g., React, Bootstrap)
+
+## License
+
+This project is licensed under the MIT License.
