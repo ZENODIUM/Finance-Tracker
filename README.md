@@ -11,6 +11,21 @@ The Gamified Finance Tracker is a web application built with Django that allows 
 - **Expense Summary**: Visual representation of expenses through line graphs and pie charts.
 - **Expense Prediction**: Forecast future expenses using the Prophet model.
 - **CSV Export**: Download financial items as a CSV file for offline analysis.
+- **Health Check Endpoint**: Monitor application status via `/ping` endpoint.
+
+## Health Check
+The application provides a simple health check endpoint for monitoring:
+
+- **Endpoint**: `GET /ping`
+- **Response**: `200 OK` with JSON body `{"status": "ok"}`
+- **Use case**: Use this endpoint to verify the application is running and responsive
+
+Example:
+
+```bash
+curl http://localhost:8000/ping
+# Returns: {"status": "ok"}
+```
 
 ## Screenshots
 ![WhatsApp Image 2024-09-24 at 13 57 14_773f1884](https://github.com/user-attachments/assets/aca04e9c-5fe6-4eb7-8fa0-97068780ee48)
