@@ -2,8 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from accounts.views import ping
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('ping', ping, name='ping'),
     path('accounts/', include('accounts.urls')),
-    path('', include('accounts.urls')),  # Redirect root URL to accounts app
+    path('', include('accounts.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
