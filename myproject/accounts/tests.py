@@ -1,5 +1,4 @@
 from django.test import TestCase, Client
-from django.urls import reverse
 import json
 
 
@@ -16,13 +15,18 @@ class PingEndpointTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_ping_returns_json_content_type(self):
-        """Test that GET /ping returns Content-Type: application/json (with optional charset)."""
+        """Test that GET /ping returns Content-Type: application/json."""
         response = self.client.get('/ping')
         content_type = response['Content-Type']
-        self.assertTrue(
-            content_type == 'application/json' or content_type.startswith('application/json;'),
-            f"Expected 'application/json' or 'application/json; charset=...', got '{content_type}'"
+        is_json = (
+            content_type == 'application/json' or
+            content_type.startswith('application/json;')
         )
+        expected_msg = (
+            "Expected 'application/json' or 'application/json; charset=...', "
+            f"got '{content_type}'"
+        )
+        self.assertTrue(is_json, expected_msg)
 
     def test_ping_returns_correct_body(self):
         """Test that GET /ping returns exactly {"status": "ok"}."""

@@ -1,12 +1,32 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegisterForm, LoginForm
-# accounts/views.py
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.http import (
+    HttpResponse,
+    HttpResponseServerError,
+    JsonResponse
+)
+from django.views.decorators.http import require_http_methods
+from django.conf import settings
+from .forms import (
+    RegisterForm,
+    LoginForm,
+    AddItemForm,
+    RemoveItemForm,
+    SetBudgetForm
+)
+from .models import FinancialItem, UserProfile
+from collections import defaultdict
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import csv
+from prophet import Prophet
+
 
 def home(request):
     return render(request, 'accounts/home.html')
+
 
 def register(request):
     if request.method == 'POST':
@@ -14,10 +34,11 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')  # Replace 'home' with your home view name
+            return redirect('home')
     else:
         form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
+
 
 def user_login(request):
     if request.method == 'POST':
@@ -28,41 +49,18 @@ def user_login(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('welcome')  # Replace 'home' with your home view name
+                return redirect('welcome')
             else:
                 form.add_error(None, "Invalid username or password")
     else:
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
 
+
 def user_logout(request):
     logout(request)
-    return redirect('login')  # Replace 'login' with your login view name
-from django.contrib.auth.decorators import login_required
+    return redirect('login')
 
-@login_required
-def welcome(request):
-    return render(request, 'accounts/welcome.html')
-
-# accounts/views.py
-
-from django.shortcuts import render, redirect
-from .forms import AddItemForm, RemoveItemForm
-from .models import FinancialItem
-from django.contrib.auth.decorators import login_required
-# accounts/views.py
-
-from django.shortcuts import render, redirect
-from .forms import AddItemForm, RemoveItemForm, SetBudgetForm
-from .models import FinancialItem, UserProfile
-from django.contrib.auth.decorators import login_required
-from collections import defaultdict
-from collections import defaultdict
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import FinancialItem, UserProfile
-from .forms import AddItemForm, RemoveItemForm, SetBudgetForm
 
 @login_required
 def welcome(request):
@@ -78,13 +76,11 @@ def welcome(request):
                 new_item.user = user
                 new_item.save()
 
-                # Update progress bar and level number if item added for a new month
+                # Update progress bar and level number if item added
                 latest_item = items.order_by('-year', '-month').first()
-                # if latest_item and (latest_item.year != new_item.year or latest_item.month != new_item.month):
-                #     user_profile.update_progress_and_level()
                 if latest_item:
                     user_profile.update_progress_and_level(latest_item)
-                
+
                 return redirect('welcome')
         elif 'remove_item' in request.POST:
             remove_form = RemoveItemForm(request.POST)
@@ -113,7 +109,11 @@ def welcome(request):
         key = (item.year, item.month)
         expenses_per_month[key] += item.cost
 
-    exceeded_months = [f"{month}/{year}" for (year, month), total in expenses_per_month.items() if total > user_profile.monthly_budget]
+    exceeded_months = [
+        f"{month}/{year}"
+        for (year, month), total in expenses_per_month.items()
+        if total > user_profile.monthly_budget
+    ]
 
     # Calculate current lives based on number of exceeded months
     if user_profile.monthly_budget > 0:
@@ -136,14 +136,6 @@ def welcome(request):
     }
     return render(request, 'accounts/welcome.html', context)
 
-# accounts/views.py
-
-from django.shortcuts import render
-from .models import FinancialItem, UserProfile
-import matplotlib.pyplot as plt
-import os
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def summary(request):
@@ -196,7 +188,14 @@ def summary(request):
 
     # Plotting expenses by tags (pie chart)
     plt.figure(figsize=(8, 8))
-    plt.pie(expenses_by_tag, labels=tags, explode=explode, autopct='%1.1f%%', shadow=True, startangle=140)
+    plt.pie(
+        expenses_by_tag,
+        labels=tags,
+        explode=explode,
+        autopct='%1.1f%%',
+        shadow=True,
+        startangle=140
+    )
     plt.axis('equal')
     plt.title(f'Total Expenses: ${total_expenses}')
 
@@ -206,22 +205,15 @@ def summary(request):
     plt.close()
 
     context = {
-        'line_plot_path': os.path.join(settings.MEDIA_URL, 'temp', 'expense_timeline.png'),
-        'pie_plot_path': os.path.join(settings.MEDIA_URL, 'temp', 'expense_summary_pie.png'),
+        'line_plot_path': os.path.join(
+            settings.MEDIA_URL, 'temp', 'expense_timeline.png'
+        ),
+        'pie_plot_path': os.path.join(
+            settings.MEDIA_URL, 'temp', 'expense_summary_pie.png'
+        ),
     }
     return render(request, 'accounts/summary.html', context)
-# views.py
-# views.py
-# views.py
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import FinancialItem
-import pandas as pd
-import os
-from django.conf import settings
-from django.http import HttpResponseServerError
-from prophet import Prophet
-import matplotlib.pyplot as plt
+
 
 @login_required
 def predict(request):
@@ -232,17 +224,21 @@ def predict(request):
     data = []
     for item in items:
         date = f"{item.year}-{item.month:02d}"
-        data.append((date, float(item.cost)))  # Ensure cost is converted to float or int
+        # Ensure cost is converted to float or int
+        data.append((date, float(item.cost)))
 
     if not data:
-        error_message = "No financial items found. Add financial data to make predictions."
+        error_message = (
+            "No financial items found. "
+            "Add financial data to make predictions."
+        )
         return HttpResponseServerError(error_message)
 
     try:
         # Create DataFrame from data
         df = pd.DataFrame(data, columns=['ds', 'y'])
         df['ds'] = pd.to_datetime(df['ds'])
-        
+
         # Initialize Prophet model
         model = Prophet()
         model.fit(df)
@@ -255,13 +251,17 @@ def predict(request):
 
         # Generate plot for Prophet forecast
         fig = model.plot(forecast)
-        plot_path = os.path.join(settings.MEDIA_ROOT, 'temp', 'expense_prediction_prophet.png')
+        plot_path = os.path.join(
+            settings.MEDIA_ROOT, 'temp', 'expense_prediction_prophet.png'
+        )
         plt.savefig(plot_path)
         plt.close(fig)
 
         context = {
             'next_month_expense': next_month_expense,
-            'plot_path': os.path.join(settings.MEDIA_URL, 'temp', 'expense_prediction_prophet.png'),
+            'plot_path': os.path.join(
+                settings.MEDIA_URL, 'temp', 'expense_prediction_prophet.png'
+            ),
         }
         return render(request, 'accounts/predict.html', context)
 
@@ -270,21 +270,15 @@ def predict(request):
         return HttpResponseServerError(error_message)
 
 
-
-# accounts/views.py
-
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_http_methods
-import csv
-from .models import FinancialItem
-
 @login_required
 def download_items_csv(request):
     user = request.user
     items = FinancialItem.objects.filter(user=user)
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="financial_items.csv"'
+    response['Content-Disposition'] = (
+        'attachment; filename="financial_items.csv"'
+    )
 
     writer = csv.writer(response)
     writer.writerow(['Name', 'Cost', 'Tag'])
