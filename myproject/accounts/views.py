@@ -274,6 +274,7 @@ def predict(request):
 # accounts/views.py
 
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_http_methods
 import csv
 from .models import FinancialItem
 
@@ -294,6 +295,7 @@ def download_items_csv(request):
     return response
 
 
+@require_http_methods(["GET"])
 def ping(request):
     """Health check endpoint that returns a simple JSON response."""
     return JsonResponse({"status": "ok"})
