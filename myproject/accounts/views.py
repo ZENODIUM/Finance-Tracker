@@ -273,7 +273,7 @@ def predict(request):
 
 # accounts/views.py
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import csv
 from .models import FinancialItem
 
@@ -292,3 +292,6 @@ def download_items_csv(request):
         writer.writerow([item.name, item.cost, item.tag])
 
     return response
+
+def ping(request):
+    return JsonResponse({"status": "ok"})
